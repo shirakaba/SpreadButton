@@ -56,6 +56,11 @@ class ViewController: UIViewController {
             return;
         }
         zySpreadButton?.subButtons = [button1, button2, button3, button4, button5]
+        
+//        guard let button1 = btn1 else {
+//            return;
+//        }
+//        zySpreadButton?.subButtons = [button1]
         zySpreadButton?.mode = SpreadModeSickleSpread
         zySpreadButton?.direction = SpreadDirectionRightUp
         zySpreadButton?.radius = 120

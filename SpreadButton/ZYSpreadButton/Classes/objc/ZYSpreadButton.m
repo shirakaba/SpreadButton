@@ -285,14 +285,16 @@
     
     //cover animation
     [UIView animateWithDuration:_animationDuring animations:^{
+        printf("A\n");
         self.cover.alpha = 0;
         [self powerButtonCloseAnimation];
     } completion:^(BOOL finished) {
+        printf("subButtons all still visible now\n");
         [self.cover removeFromSuperview];
         self.frame = self.powerButton.frame;
-        self.powerButton.frame = self.bounds;
+        self.powerButton.frame = self.bounds; // Last state where 0,0 subButton can be paused
     }];
-    
+    // Runs before completion block.
     [self closeSubButton:exclusiveBtn];
     
     //Block
@@ -300,29 +302,46 @@
 }
 
 - (void)closeSubButton:(ZYSpreadSubButton *)exclusiveBtn {
+    printf("%lu\n", (unsigned long)_subButtons.count);
+//    printf("%s", exclusiveBtn);
     for (ZYSpreadSubButton *btn in _subButtons) {
         if (exclusiveBtn != nil) {
             if (btn != exclusiveBtn) {
+                printf("Not the exclusive button.\n");
                 [btn removeFromSuperview];
             }
             continue;
         }
         
+        CABasicAnimation *alphaAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+        alphaAnimation.fromValue = @(1.0f);
+        alphaAnimation.toValue = @(0.0f);
+        alphaAnimation.duration = 0.5;
+        alphaAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionDefault];
+        
         UIBezierPath *animationPath = [self movingPathWithStartPoint:btn.layer.position keyPointCount:1 keyPoints:_powerButton.layer.position, nil];
-        CAKeyframeAnimation *positionAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
-        positionAnimation.path = animationPath.CGPath;
-        positionAnimation.keyTimes = @[@(0.0), @(1.0)];
+        CAKeyframeAnimation *posAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+        posAnimation.path = animationPath.CGPath;
+        posAnimation.keyTimes = @[@(0.0), @(1.0)];
+        posAnimation.duration = _animationDuring;
+        posAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        
+        CAAnimationGroup *positionAnimation = [[CAAnimationGroup alloc] init];
+        positionAnimation.animations = @[alphaAnimation, posAnimation];
         positionAnimation.duration = _animationDuring;
-        positionAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        
+        //[btn.layer addAnimation:positionAnimation forKey:@"close"];
         [btn.layer addAnimation:positionAnimation forKey:@"close"];
         
         [CATransaction begin];
         [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
         btn.frame = CGRectMake(0, 0, btn.bounds.size.width, btn.bounds.size.height);
+        btn.layer.opaque = 0.0f;
         [CATransaction commit];
     }
     
     if (exclusiveBtn != nil) {
+        printf("Exclusive button ain't nil\n");
         CABasicAnimation *alphaAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
         alphaAnimation.fromValue = @(1.0f);
         alphaAnimation.toValue = @(0.0f);
