@@ -325,8 +325,8 @@
         
         [CATransaction begin];
         [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
-//        btn.frame = CGRectMake(0, 0, btn.bounds.size.width, btn.bounds.size.height);
-        btn.frame = CGRectMake(10000, 10000, btn.bounds.size.width, btn.bounds.size.height);
+        btn.frame = CGRectMake(0, 0, btn.bounds.size.width, btn.bounds.size.height);
+//        btn.frame = CGRectMake(10000, 10000, btn.bounds.size.width, btn.bounds.size.height);
 //        btn.hidden = YES;
         [CATransaction commit];
     }
